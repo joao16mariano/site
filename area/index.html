@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autenticação - Controle Wemos</title>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 450px;
+    }
+
+    .login-card {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+      padding: 40px 30px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .logo {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 20px;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 40px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    h1 {
+      color: #1e3c72;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .input-group {
+      position: relative;
+    }
+
+    input {
+      width: 100%;
+      padding: 15px 15px 15px 45px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 16px;
+      transition: all 0.3s;
+      background-color: #f9f9f9;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #1e3c72;
+      box-shadow: 0 0 0 2px rgba(30, 60, 114, 0.2);
+      background-color: white;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #777;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+    }
+
+    button {
+      flex: 1;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-login {
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      color: white;
+    }
+
+    .btn-login:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(30, 60, 114, 0.4);
+    }
+
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #333;
+    }
+
+    .btn-secondary:hover {
+      background: #e0e0e0;
+      transform: translateY(-2px);
+    }
+
+    .btn-danger {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #c0392b;
+      transform: translateY(-2px);
+    }
+
+    .error-message {
+      color: #e74c3c;
+      font-size: 14px;
+      margin-top: 5px;
+      text-align: left;
+      display: none;
+    }
+
+    .success-message {
+      color: #27ae60;
+      font-size: 14px;
+      margin-top: 5px;
+      text-align: left;
+      display: none;
+    }
+
+    .footer {
+      margin-top: 30px;
+      color: #777;
+      font-size: 14px;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      margin: 10px 0;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #1e3c72;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 480px) {
+      .login-card {
+        padding: 30px 20px;
+      }
+      
+      .btn-group {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="login-card">
+      <div class="logo">
+        <i>W</i>
+      </div>
+      <h1>LUZ DA ÁREA</h1>
+      <p class="subtitle">Faça login para acessar a luz da área</p>
+      
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">E-mail</label>
+          <div class="input-group">
+            <span class="input-icon">✉</span>
+            <input type="email" id="email" placeholder="seu@email.com" required>
+          </div>
+          <div id="emailError" class="error-message">Por favor, insira um e-mail válido</div>
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Senha</label>
+          <div class="input-group">
+            <span class="input-icon">🔒</span>
+            <input type="password" id="password" placeholder="Sua senha" required>
+          </div>
+          <div id="passwordError" class="error-message">A senha deve ter pelo menos 6 caracteres</div>
+        </div>
+        
+        <div class="loading" id="loading">
+          <div class="spinner"></div>
+          <p>Autenticando...</p>
+        </div>
+        
+        <div id="authError" class="error-message"></div>
+        <div id="authSuccess" class="success-message"></div>
+        
+        <div class="btn-group">
+          <button type="submit" class="btn-login">Entrar</button>
+          <button type="button" class="btn-secondary" id="registerBtn">Cadastrar</button>
+        </div>
+        
+        <div class="btn-group" style="margin-top: 15px;">
+          <button type="button" class="btn-danger" id="deleteBtn">Apagar Conta</button>
+        </div>
+      </form>
+      
+      <div class="footer">
+        <p>© 2023 Controle Wemos - Sistema de Automação</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Configuração do Firebase
+    const firebaseConfig = {
+    apiKey: "AIzaSyDK6BihUGbjJAUCog5ar10xrLIEoW3DrpU",
+  authDomain: "luzdaarea.firebaseapp.com",
+  databaseURL: "https://luzdaarea-default-rtdb.firebaseio.com",
+  projectId: "luzdaarea",
+  storageBucket: "luzdaarea.firebasestorage.app",
+  messagingSenderId: "176018884427",
+  appId: "1:176018884427:web:2ad49bf76602f505830ace",
+  measurementId: "G-8PX143ZRBZ"
+    };
+
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const loginForm = document.getElementById('loginForm');
+      const emailInput = document.getElementById('email');
+      const passwordInput = document.getElementById('password');
+      const emailError = document.getElementById('emailError');
+      const passwordError = document.getElementById('passwordError');
+      const authError = document.getElementById('authError');
+      const authSuccess = document.getElementById('authSuccess');
+      const loading = document.getElementById('loading');
+      const registerBtn = document.getElementById('registerBtn');
+      const deleteBtn = document.getElementById('deleteBtn');
+      
+      // Verificar se o usuário já está logado
+      auth.onAuthStateChanged((user) => {
+        if (user) {
+          // Usuário já está autenticado, redirecionar para a página principal
+          window.location.href = 'principal.html';
+        }
+      });
+
+      // Validação de e-mail
+      function validateEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+      }
+      
+      // Validação de senha
+      function validatePassword(password) {
+        return password.length >= 6;
+      }
+      
+      // Mostrar erro
+      function showError(element, message) {
+        element.textContent = message;
+        element.style.display = 'block';
+      }
+      
+      // Esconder erro
+      function hideError(element) {
+        element.style.display = 'none';
+      }
+      
+      // Mostrar sucesso
+      function showSuccess(message) {
+        authSuccess.textContent = message;
+        authSuccess.style.display = 'block';
+        setTimeout(() => {
+          authSuccess.style.display = 'none';
+        }, 3000);
+      }
+      
+      // Validação em tempo real
+      emailInput.addEventListener('input', function() {
+        if (validateEmail(emailInput.value)) {
+          hideError(emailError);
+        }
+        hideError(authError);
+      });
+      
+      passwordInput.addEventListener('input', function() {
+        if (validatePassword(passwordInput.value)) {
+          hideError(passwordError);
+        }
+        hideError(authError);
+      });
+      
+      // Login com Firebase
+      function loginUser(email, password) {
+        loading.style.display = 'block';
+        hideError(authError);
+        
+        auth.signInWithEmailAndPassword(email, password)
+          .then((userCredential) => {
+            // Login bem-sucedido
+            loading.style.display = 'none';
+            showSuccess('Login realizado com sucesso!');
+            setTimeout(() => {
+              window.location.href = 'principal.html';
+            }, 1000);
+          })
+          .catch((error) => {
+            loading.style.display = 'none';
+            const errorCode = error.code;
+            let errorMessage = 'Erro ao fazer login';
+            
+            switch(errorCode) {
+              case 'auth/invalid-email':
+                errorMessage = 'E-mail inválido';
+                break;
+              case 'auth/user-disabled':
+                errorMessage = 'Esta conta foi desativada';
+                break;
+              case 'auth/user-not-found':
+                errorMessage = 'Usuário não encontrado';
+                break;
+              case 'auth/wrong-password':
+                errorMessage = 'Senha incorreta';
+                break;
+              default:
+                errorMessage = 'Erro ao fazer login. Tente novamente.';
+            }
+            
+            showError(authError, errorMessage);
+          });
+      }
+      
+      // Cadastro com Firebase
+      function registerUser(email, password) {
+        loading.style.display = 'block';
+        hideError(authError);
+        
+        auth.createUserWithEmailAndPassword(email, password)
+          .then((userCredential) => {
+            // Cadastro bem-sucedido
+            loading.style.display = 'none';
+            showSuccess('Conta criada com sucesso!');
+            // Login automático após cadastro
+            setTimeout(() => {
+              window.location.href = 'principal.html';
+            }, 1000);
+          })
+          .catch((error) => {
+            loading.style.display = 'none';
+            const errorCode = error.code;
+            let errorMessage = 'Erro ao criar conta';
+            
+            switch(errorCode) {
+              case 'auth/email-already-in-use':
+                errorMessage = 'Este e-mail já está em uso';
+                break;
+              case 'auth/invalid-email':
+                errorMessage = 'E-mail inválido';
+                break;
+              case 'auth/weak-password':
+                errorMessage = 'Senha muito fraca';
+                break;
+              default:
+                errorMessage = 'Erro ao criar conta. Tente novamente.';
+            }
+            
+            showError(authError, errorMessage);
+          });
+      }
+      
+      // Excluir conta
+      function deleteUser() {
+        const user = auth.currentUser;
+        if (!user) {
+          showError(authError, 'Nenhum usuário logado');
+          return;
+        }
+        
+        if (!confirm('Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.')) {
+          return;
+        }
+        
+        loading.style.display = 'block';
+        
+        user.delete()
+          .then(() => {
+            loading.style.display = 'none';
+            showSuccess('Conta excluída com sucesso!');
+            // Limpar formulário
+            emailInput.value = '';
+            passwordInput.value = '';
+          })
+          .catch((error) => {
+            loading.style.display = 'none';
+            showError(authError, 'Erro ao excluir conta. Faça login novamente e tente outra vez.');
+          });
+      }
+      
+      // Submissão do formulário (Login)
+      loginForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        let isValid = true;
+        
+        // Validar e-mail
+        if (!validateEmail(emailInput.value)) {
+          showError(emailError, 'Por favor, insira um e-mail válido');
+          isValid = false;
+        } else {
+          hideError(emailError);
+        }
+        
+        // Validar senha
+        if (!validatePassword(passwordInput.value)) {
+          showError(passwordError, 'A senha deve ter pelo menos 6 caracteres');
+          isValid = false;
+        } else {
+          hideError(passwordError);
+        }
+        
+        // Se for válido, fazer login
+        if (isValid) {
+          loginUser(emailInput.value, passwordInput.value);
+        }
+      });
+      
+      // Botão de cadastro
+      registerBtn.addEventListener('click', function() {
+        let isValid = true;
+        
+        // Validar e-mail
+        if (!validateEmail(emailInput.value)) {
+          showError(emailError, 'Por favor, insira um e-mail válido');
+          isValid = false;
+        } else {
+          hideError(emailError);
+        }
+        
+        // Validar senha
+        if (!validatePassword(passwordInput.value)) {
+          showError(passwordError, 'A senha deve ter pelo menos 6 caracteres');
+          isValid = false;
+        } else {
+          hideError(passwordError);
+        }
+        
+        // Se for válido, criar conta
+        if (isValid) {
+          registerUser(emailInput.value, passwordInput.value);
+        }
+      });
+      
+      // Botão de excluir conta
+      deleteBtn.addEventListener('click', function() {
+        deleteUser();
+      });
+    });
+  </script>
+</body>
+</html>

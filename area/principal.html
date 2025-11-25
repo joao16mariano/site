@@ -1,0 +1,672 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Controle Wemos</title>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+    body {
+     background: linear-gradient(135deg, #ff7a00 0%, #000000 100%);
+
+      color: white;
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: start;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+    
+    /* Botão de logout */
+    .logout-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+    
+    .logout-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.05);
+    }
+	
+    .status-button {
+      width: 380px;
+      height: 160px;
+      color: white;
+      border: none;
+      margin-top: 10px;
+      font-size: 45px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .ligado {
+     background: url(img/ligado.png) no-repeat left bottom; /* cor do ligado */
+    }
+    .desligado {
+     background: url(img/desligado.png) no-repeat left bottom; /* cor do botão desligado */
+    }
+    .status-button:hover {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
+    .status-button:active {
+      transform: scale(0.95);
+    }
+	
+	.status-button-led5 {
+      width: 380px;
+      height: 160px;
+      color: white;
+      border: none;
+      margin-top: 10px;
+      font-size: 45px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .ligado-led5 {
+     background: url(img/ligado.png) no-repeat left bottom; /* cor do ligado */
+    }
+    .desligado-led5 {
+     background: url(img/desligado.png) no-repeat left bottom; /* cor do botão desligado */
+    }
+    .status-button-led5:hover {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
+    .status-button-led5:active {
+      transform: scale(0.95);
+    }
+	
+	.status-button-automatico {
+      width: 380px;
+      height: 160px;
+      color: white;
+      border: none;
+      margin-top: 10px;
+      font-size: 45px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .ligado-automatico {
+     background: url(img/automatico.png) no-repeat left bottom; /* cor do ligado */
+    }
+    .desligado-automatico {
+     background: url(img/manual.png) no-repeat left bottom; /* cor do botão desligado */
+    }
+    .status-button-automatico:hover {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
+    .status-button-automatico:active {
+      transform: scale(0.95);
+    }
+	
+    .clock {
+      font-size: 60px;
+      color: #0F0;
+      background: #020024;
+    }
+    .agendamentos, .info, .sensores {
+      width: 880px;
+      max-width: 1820px;
+     background: linear-gradient(135deg, #ff7a00 0%, #000000 100%);
+
+      padding: 30px;
+      border-radius: 12px;
+      margin: 15px 0;
+      text-align: center;
+      border: 1px solid white;
+    }
+    .agendamentos h2, .sensores h2 {
+      margin-bottom: 15px;
+      font-size: 28px;
+    }
+    label {
+      font-size: 22px;
+      display: block;
+      margin-top: 10px;
+      margin-bottom: 5px;
+    }
+	
+	/* Caixa de digitar horários */
+    input[type="time"] {
+      width: 30%;
+      padding: 18px 30px;
+      margin-bottom: 10px;
+      font-size: 40px;
+      border-radius: 8px;
+      border: none;
+      background-color: #ccc;
+      color: #000;
+    }
+
+    .info {
+      background-color: #1a1f5d;
+      font-size: 36px;
+      line-height: 1.8;
+      font-weight: bold;
+    }
+    .info span.red {
+      color: #0CF;
+    }
+    .info span.green {
+      color: lime;
+    }
+    .info span.azul {
+      color: #0C0;
+    }
+    
+    .sensores {
+      background-color: black;
+      color: #00ff00;
+      font-size: 43.2px;
+      font-weight: bold;
+    }
+
+    .sensores div {
+      margin: 10px 0;
+    }
+    .horario1 {
+      font-size: 50px;
+      color: #FFF;
+    }
+    .automatico {
+      font-size: 30px;
+      color: white;
+      margin-top: 5px;
+    }
+    .separador {
+      height: 4px;
+      margin: 30px 0;
+      background: linear-gradient(90deg, #F33, #3a00ff, #F33);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+      border-radius: 4px;
+    }
+    .caixa {
+      width: 24px;
+      height: 24px;
+      background-color: lime;
+      border-radius: 4px;
+    }
+	
+	/* Efeito de pulsação */
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.7); }
+      70% { box-shadow: 0 0 0 20px rgba(0, 255, 0, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 255, 0, 0); }
+    }
+
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes corAnimada {
+      0% { background-color: #00ff00; }
+      50% { background-color: #1aff66; }
+      100% { background-color: #00ff00; }
+    }
+
+    .cor-animada {
+      animation: corAnimada 2s infinite;
+      box-shadow: 0 0 20px 5px rgba(0, 255, 0, 0.5);
+    }
+
+    .vermelho {
+      background-color:#F90 !important;
+    }
+
+    @keyframes pulse {
+      0% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.4;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+
+    .pulse {
+      animation: pulse 1s infinite;
+    }
+    
+    .controle-botao {
+      width: 880px;
+      max-width: 1820px;
+     background: linear-gradient(135deg, #ff7a00 0%, #000000 100%);
+      padding: 30px;
+      border-radius: 12px;
+      margin: 1px 0;
+      text-align: center;
+      border: 1px solid white;
+    }
+
+    /* Loading screen */
+    .loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    
+    .loading-spinner {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #1e3c72;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+	
+	/* Nova classe para os botões da seção de páginas */
+.pagina-botao {
+    width: 150px; /* Largura fixa */
+    height: 40px; /* Altura fixa */
+    padding: 10px 20px;
+    background: #033;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 18px;
+    margin: 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: all 0.3s ease;
+}
+
+.pagina-botao:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+	 .pagina {
+      width: 880px;
+      max-width: 1820px;
+     background: linear-gradient(135deg, #ff7a00 0%, #000000 100%);
+
+      padding: 30px;
+      border-radius: 12px;
+      margin: 1px 0;
+      text-align: center;
+      border: 1px solid white;
+    }
+
+  </style>
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div id="loadingScreen" class="loading-screen">
+    <div class="loading-spinner"></div>
+  </div>
+
+  <!-- Botão de Logout -->
+  <button id="logoutBtn" class="logout-btn">Sair</button>
+  
+  <img src="img/Luzdaarea.png" width="864" height="150" style="margin-bottom: 30px;">
+  
+  <div class="pagina">
+    <h2>Páginas hospedadas no gitHub</h2>
+    <!-- Botão de Logout -->
+ <div>. </div>
+<button class="pagina-botao" onclick="window.location.href='../index.html'">
+ Portão
+</button>
+
+<button class="pagina-botao" onclick="window.location.href='../index.html'">
+ Bebedouro
+</button>
+
+<button class="pagina-botao" onclick="window.location.href='area/index.html'">
+Luz Área
+</button>
+
+<button class="pagina-botao" onclick="window.location.href='../index.html'">
+ Inversor
+</button>
+
+<button class="pagina-botao" onclick="window.location.href='../index.html'">
+ Computador
+</button>
+
+<button class="pagina-botao" onclick="window.location.href='../index.html'">
+ TV Sala
+</button>
+
+<button class="pagina-botao" onclick="window.location.href='../index.html'">
+ Inversor
+</button>
+
+<button class="pagina-botao" onclick="window.location.href='../index.html'">
+ C. d'água
+</button>
+
+<button class="pagina-botao" onclick="window.location.href='../index.html'">
+ Canteiro
+</button>
+
+<button class="pagina-botao" onclick="window.location.href='../index.html'">
+Tutorial
+</button>
+
+    
+  </div>
+  
+  <div class="controle-botao" style="flex-direction: column; align-items: center;">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 30px;">
+      <div style="display: flex; justify-content: center; align-items: center; gap: 190px;">
+      
+        <button id="ligarDesligar" class="status-button desligado-automatico"></button>
+        
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <div id="relogio" class="clock">00:00:00</div>
+          <div id="releStatus" class="automatico">Lâmpada: Desligada</div>
+        </div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 60px; margin-top: 20px;">
+    
+     <!-- botao lampada-->
+     <button id="btnLed5" class="status-button desligado"></button>
+     
+      
+      
+      <button id="btnLed" class="status-button desligado"></button>
+    </div>
+    <!-- Colocando os novos botões abaixo de LED e LED1 -->
+    <div style="display: flex; gap: 60px; margin-top: 20px;">
+      <button id="btnExtra1" class="status-button desligado"></button>
+      <button id="btnExtra2" class="status-button desligado"></button>
+    </div>
+  </div>
+
+  <div class="agendamentos">
+    <h1>AGENDAMENTO 1</h1>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <div class="caixa"></div>
+        <label for="ligarHorario" class="horario1">Horário para Ligar</label>
+      </div>
+      <input type="time" id="ligarHorario">
+    </div>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <div class="caixa"></div>
+        <label for="desligarHorario" class="horario1">Horário para Desligar</label>
+      </div>
+      <input type="time" id="desligarHorario">
+    </div>
+    <div class="separador"></div>
+    <h1 class="agendamento2">AGENDAMENTO 2</h1>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <div class="caixa"></div>
+        <label for="ligarHorario2" class="horario1">Horário para Ligar</label>
+      </div>
+      <input type="time" id="ligarHorario2">
+    </div>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <div class="caixa"></div>
+        <label for="desligarHorario2" class="horario1">Horário para Desligar</label>
+      </div>
+      <input type="time" id="desligarHorario2">
+    </div>
+  </div>
+
+  <div class="info">
+    <div>Data da conexão: <span id="dataConexao" class="azul"></span></div>
+    <div>Horário da conexão: <span id="horaConexao" class="red"></span>:<span id="minutoConexao" class="red"></span>:<span id="segundoConexao" class="red"></span></div>
+    <div>Tempo conectado: <span id="horasAtual" class="green"></span>h <span id="minutosAtual" class="green"></span>m <span id="segundosAtual" class="green"></span>s</div>
+    <div>Status da conexão: <span id="statusConexao"></span></div>
+  </div>
+
+  <div class="sensores">
+    <h2>Sensores</h2>
+    <div>Temperature: <span id="Temperature"></span> °C</div>
+    <div>Humidity: <span id="Humidity"></span> %</div>
+    <div>LDR: <span id="LDR"></span></div>
+  </div>
+
+  <script>
+    // Configuração do Firebase
+    const firebaseConfig = {
+    // 🔧 Substitua por suas credenciais
+  apiKey: "AIzaSyDK6BihUGbjJAUCog5ar10xrLIEoW3DrpU",
+  authDomain: "luzdaarea.firebaseapp.com",
+  databaseURL: "https://luzdaarea-default-rtdb.firebaseio.com",
+  projectId: "luzdaarea",
+  storageBucket: "luzdaarea.firebasestorage.app",
+  messagingSenderId: "176018884427",
+  appId: "1:176018884427:web:2ad49bf76602f505830ace",
+  measurementId: "G-8PX143ZRBZ"
+    };
+
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    // Elementos da interface
+    const loadingScreen = document.getElementById('loadingScreen');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    // Verificar autenticação
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        // Usuário autenticado, mostrar conteúdo
+        loadingScreen.style.display = 'none';
+        initializeApp();
+      } else {
+        // Usuário não autenticado, redirecionar para login
+        window.location.href = 'index.html';
+      }
+    });
+
+    // Logout
+    logoutBtn.addEventListener('click', () => {
+      auth.signOut().then(() => {
+        window.location.href = 'index.html';
+      }).catch((error) => {
+        console.error('Erro ao fazer logout:', error);
+      });
+    });
+
+    // Inicializar a aplicação após autenticação
+    function initializeApp() {
+      function atualizarBotaoClasse(botao, ligado) {
+        botao.classList.remove("ligado", "desligado", "pulse");
+        botao.classList.add(ligado ? "ligado" : "desligado");
+      }
+
+      function atualizarBotaoAutomatico(valor) {
+        const botao = document.getElementById('ligarDesligar');
+        botao.classList.remove("ligado-automatico", "desligado-automatico");
+
+        if (valor == 2) {
+          botao.classList.add("ligado-automatico");
+        } else {
+          botao.classList.add("desligado-automatico");
+        }
+      }
+
+      document.getElementById('btnLed5').addEventListener('click', () => {
+        const ref = db.ref("/led5");
+        ref.once("value").then(snapshot => {
+          const novo = snapshot.val() === "0" ? "1" : "0";
+          ref.set(novo);
+        });
+      });
+
+      document.getElementById('btnLed').addEventListener('click', () => {
+        const ref = db.ref("/led");
+        ref.once("value").then(snapshot => {
+          const novo = snapshot.val() === "0" ? "1" : "0";
+          ref.set(novo);
+        });
+      });
+
+      document.getElementById('btnExtra1').addEventListener('click', () => {
+        const ref = db.ref("/led2");
+        ref.once("value").then(snapshot => {
+          const novo = snapshot.val() === "0" ? "1" : "0";
+          ref.set(novo);
+        });
+      });
+
+      document.getElementById('btnExtra2').addEventListener('click', () => {
+        const ref = db.ref("/led3");
+        ref.once("value").then(snapshot => {
+          const novo = snapshot.val() === "0" ? "1" : "0";
+          ref.set(novo);
+        });
+      });
+
+      document.getElementById('ligarDesligar').addEventListener('click', () => {
+        db.ref("/ligarDesligar").once("value").then(snapshot => {
+          const valorAtual = snapshot.val();
+          const novoValor = (valorAtual == 0) ? 2 : 0;
+          db.ref("/ligarDesligar").set(novoValor);
+        });
+      });
+
+      ['ligarHorario', 'desligarHorario', 'ligarHorario2', 'desligarHorario2'].forEach(id => {
+        document.getElementById(id).addEventListener('change', (e) => {
+          db.ref(`/${id}`).set(e.target.value);
+        });
+      });
+
+      db.ref("/").on('value', snapshot => {
+        const d = snapshot.val();
+        if (!d) return;
+
+        //visualizar horários agendados
+        const btnLed5 = document.getElementById('btnLed5');
+        const btnLed1 = document.getElementById('btnLed');
+        const btnExtra1 = document.getElementById('btnExtra1');
+        const btnExtra2 = document.getElementById('btnExtra2');
+        const btnPrincipal = document.getElementById('ligarDesligar');
+        
+        // Preencher os horários agendados nos campos input em tempo real
+        document.getElementById("ligarHorario").value = d.ligarHorario || "";
+        document.getElementById("desligarHorario").value = d.desligarHorario || "";
+        document.getElementById("ligarHorario2").value = d.ligarHorario2 || "";
+        document.getElementById("desligarHorario2").value = d.desligarHorario2 || "";
+
+        // Atualiza botão principal com base no valor /ligarDesligar
+        if (d.ligarDesligar !== undefined) {
+          atualizarBotaoAutomatico(d.ligarDesligar);
+          document.getElementById('releStatus').innerText =
+            d.ligarDesligar == 2 ? "Modo: Programado" : "Modo: Manual";
+        }
+
+        // LED5 (btnLed5)
+        if (d.rele !== undefined) {
+          const ligado = d.rele === "0";
+          btnLed5.classList.remove("vermelho", "ligado", "desligado");
+          btnLed5.classList.add(ligado ? "vermelho" : "desligado");
+          if (ligado) btnLed5.classList.add("ligado");
+          if (!ligado) btnLed1.classList.add("pulse");
+        }
+
+        // LED1 (btnLed1)
+        if (d.led !== undefined) {
+          const ligado = d.led === "1"; // só TRUE se estiver ligado
+          btnLed.classList.remove("ligado", "desligado", "pulse");
+          btnLed.classList.add(ligado ? "desligado" : "ligado");
+
+          // Se estiver desligado (valor "0" do Firebase), adiciona a animação pulse
+          if (!ligado) btnLed.classList.add("pulse");
+        }
+
+        // Extra1 (btnExtra1)
+        if (d.led2 !== undefined) {
+          const ligado = d.led2 === "1";
+          btnExtra1.classList.remove("ligado", "desligado", "pulse");
+          btnExtra1.classList.add(ligado ? "desligado" : "ligado");
+          if (!ligado) btnExtra1.classList.add("pulse");
+        }
+
+        // Extra2 (btnExtra2)
+        if (d.led3 !== undefined) {
+          const ligado = d.led3 === "1";
+          btnExtra2.classList.remove("ligado", "desligado", "pulse");
+          btnExtra2.classList.add(ligado ? "desligado" : "ligado");
+          if (!ligado) btnExtra2.classList.add("pulse");
+        }
+
+        // Sensor data
+        document.getElementById("Temperature").innerText = d.Temperature || "";
+        document.getElementById("Humidity").innerText = d.Humidity || "";
+        document.getElementById("LDR").innerText = d.LDR || "";
+
+        document.getElementById("dataConexao").innerText = d.datasAtual || "";
+        document.getElementById("horaConexao").innerText = d.hora || "";
+        document.getElementById("minutoConexao").innerText = d.minuto || "";
+        document.getElementById("segundoConexao").innerText = d.segundo || "";
+
+        document.getElementById("horasAtual").innerText = d.horasAtual || "";
+        document.getElementById("minutosAtual").innerText = d.minutosAtual || "";
+        document.getElementById("segundosAtual").innerText = d.segundosAtual || "";
+
+        document.getElementById("statusConexao").innerText = d.Status == 1 ? "1" : "0";
+        btnPrincipal.classList.toggle("pulse", d.Status == 1);
+      });
+
+      function atualizarRelogio() {
+        const agora = new Date();
+        document.getElementById('relogio').innerText = agora.toLocaleTimeString();
+      }
+      setInterval(atualizarRelogio, 1000);
+    }
+  </script>
+</body>
+</html>
