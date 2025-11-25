@@ -1,0 +1,560 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Controle Wemos</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+    body {
+      background: linear-gradient(90deg, rgba(24, 16, 163, 1) 0%, rgba(9, 44, 121, 1) 4%, rgba(0, 212, 255, 1) 100%);
+      color: white;
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: start;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+
+    .logout-button {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 10px 20px;
+      background: #ff4757;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      z-index: 100;
+    }
+
+    .logout-button:hover {
+      background: #ff3742;
+    }
+
+    .status-button {
+      width: 400px;
+      height: 160px;
+      color: white;
+      border: none;
+      margin-top: 10px;
+      font-size: 45px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .ligado {
+     background: url(img/ligado.png) no-repeat left bottom;
+    }
+    .desligado {
+     background: url(img/desligado.png) no-repeat left bottom;
+    }
+    .status-button:hover {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
+    .status-button:active {
+      transform: scale(0.95);
+    }
+
+    .status-button-led5 {
+      width: 400px;
+      height: 160px;
+      color: white;
+      border: none;
+      margin-top: 10px;
+      font-size: 45px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .ligado-led5 {
+     background: url(img/ligado.png) no-repeat left bottom;
+    }
+    .desligado-led5 {
+     background: url(img/desligado.png) no-repeat left bottom;
+    }
+    .status-button-led5:hover {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
+    .status-button-led5:active {
+      transform: scale(0.95);
+    }
+
+    .status-button-automatico {
+      width: 400px;
+      height: 160px;
+      color: white;
+      border: none;
+      margin-top: 10px;
+      font-size: 45px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .ligado-automatico {
+     background: url(img/automatico.png) no-repeat left bottom;
+    }
+    .desligado-automatico {
+     background: url(img/manual.png) no-repeat left bottom;
+    }
+    .status-button-automatico:hover {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
+    .status-button-automatico:active {
+      transform: scale(0.95);
+    }
+
+    .clock {
+      font-size: 60px;
+      color: #0F0;
+      background: #020024;
+    }
+    .agendamentos, .info, .sensores {
+      width: 880px;
+      max-width: 1820px;
+      background: linear-gradient(304deg, rgba(2, 0, 36, 1) 5%, rgba(9, 9, 121, 1) 29%, rgba(0, 212, 255, 1) 100%);
+      padding: 30px;
+      border-radius: 12px;
+      margin: 15px 0;
+      text-align: center;
+      border: 1px solid white;
+    }
+    .agendamentos h2, .sensores h2 {
+      margin-bottom: 15px;
+      font-size: 28px;
+    }
+    label {
+      font-size: 22px;
+      display: block;
+      margin-top: 10px;
+      margin-bottom: 5px;
+    }
+
+    input[type="time"] {
+      width: 30%;
+      padding: 18px 30px;
+      margin-bottom: 10px;
+      font-size: 40px;
+      border-radius: 8px;
+      border: none;
+      background-color: #ccc;
+      color: #000;
+    }
+
+    .info {
+      background-color: #1a1f5d;
+      font-size: 36px;
+      line-height: 1.8;
+      font-weight: bold;
+    }
+    .info span.red {
+      color: #0CF;
+    }
+    .info span.green {
+      color: lime;
+    }
+    .info span.azul {
+      color: #0C0;
+    }
+    .sensores {
+      background-color: black;
+      color: #00ff00;
+      font-size: 43.2px;
+      font-weight: bold;
+    }
+
+    .sensores div {
+      margin: 10px 0;
+    }
+    .horario1 {
+      font-size: 50px;
+      color: #FFF;
+    }
+    .automatico {
+      font-size: 30px;
+      color: white;
+      margin-top: 5px;
+    }
+    .separador {
+      height: 4px;
+      margin: 30px 0;
+      background: linear-gradient(90deg, #F33, #3a00ff, #F33);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+      border-radius: 4px;
+    }
+    .caixa {
+      width: 24px;
+      height: 24px;
+      background-color: lime;
+      border-radius: 4px;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.7); }
+      70% { box-shadow: 0 0 0 20px rgba(0, 255, 0, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 255, 0, 0); }
+    }
+
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes corAnimada {
+      0% { background-color: #00ff00; }
+      50% { background-color: #1aff66; }
+      100% { background-color: #00ff00; }
+    }
+
+    .cor-animada {
+      animation: corAnimada 2s infinite;
+      box-shadow: 0 0 20px 5px rgba(0, 255, 0, 0.5);
+    }
+
+    .vermelho {
+      background-color:#F90 !important;
+    }
+
+    @keyframes pulse {
+      0% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.4;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+
+    .pulse {
+      animation: pulse 1s infinite;
+    }
+
+    .rele-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .rele-container label {
+      margin-bottom: -2px;
+      font-weight: bold;
+      font-size: 35px;
+      color: #fff;
+      transition: color 0.3s ease;
+    }
+
+    .rele-container .ligado + label {
+      color: #00bfff;
+    }
+
+    .rele-container .desligado + label {
+      color: #999;
+    }
+
+    .rele-container .ligado + label {
+      text-shadow: 0 0 15px rgba(0, 191, 255, 0.8);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <button id="logoutButton" class="logout-button">Sair</button>
+  
+  <img src="img/Luzdaarea.png" width="864" height="150" style="margin-bottom: 30px;">
+
+  <div class="topo" style="flex-direction: column; align-items: center;">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 30px;">
+      <div style="display: flex; justify-content: center; align-items: center; gap: 190px;">
+
+        <button id="ligarDesligar" class="status-button desligado-automatico"></button>
+
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <div id="relogio" class="clock">00:00:00</div>
+          <div id="releStatus" class="automatico">Lâmpada: Desligada</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Linha dos dois primeiros relés -->
+    <div style="display: flex; gap: 60px; margin-top: 20px;">
+      <div class="rele-container">
+        <label for="btnLed5">TELEVISOR</label>
+        <button id="btnLed5" class="status-button desligado"></button>
+      </div>
+
+      <div class="rele-container">
+        <label for="btnLed">Rele2</label>
+        <button id="btnLed" class="status-button desligado"></button>
+      </div>
+    </div>
+
+    <!-- Linha dos dois relés extras -->
+    <div style="display: flex; gap: 60px; margin-top: 20px;">
+      <div class="rele-container">
+        <label for="btnExtra1">LÂMPADA</label>
+        <button id="btnExtra1" class="status-button desligado"></button>
+      </div>
+
+      <div class="rele-container">
+        <label for="btnExtra2">DVR</label>
+        <button id="btnExtra2" class="status-button desligado"></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="agendamentos">
+    <h1>AGENDAMENTO 1</h1>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <div class="caixa"></div>
+        <label for="ligarHorario" class="horario1">Horário para Ligar</label>
+      </div>
+      <input type="time" id="ligarHorario">
+    </div>
+
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <div class="caixa"></div>
+        <label for="desligarHorario" class="horario1">Horário para Desligar</label>
+      </div>
+      <input type="time" id="desligarHorario">
+    </div>
+
+    <div class="separador"></div>
+
+    <h1 class="agendamento2">AGENDAMENTO 2</h1>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <div class="caixa"></div>
+        <label for="ligarHorario2" class="horario1">Horário para Ligar</label>
+      </div>
+      <input type="time" id="ligarHorario2">
+    </div>
+
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <div class="caixa"></div>
+        <label for="desligarHorario2" class="horario1">Horário para Desligar</label>
+      </div>
+      <input type="time" id="desligarHorario2">
+    </div>
+  </div>
+
+  <div class="info">
+    <div>Data da conexão: <span id="dataConexao" class="azul"></span></div>
+    <div>Horário da conexão: <span id="horaConexao" class="red"></span>:<span id="minutoConexao" class="red"></span>:<span id="segundoConexao" class="red"></span></div>
+    <div>Tempo conectado: <span id="horasAtual" class="green"></span>h <span id="minutosAtual" class="green"></span>m <span id="segundosAtual" class="green"></span>s</div>
+    <div>Status da conexão: <span id="statusConexao"></span></div>
+  </div>
+
+  <div class="sensores">
+    <h2>Sensores</h2>
+    <div>Temperature: <span id="Temperature"></span> °C</div>
+    <div>Humidity: <span id="Humidity"></span> %</div>
+    <div>LDR: <span id="LDR"></span></div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAKS3HncDL0JMXqMt8PZBL6LPaNOJUTmrM",
+      authDomain: "aplicativo4000-313ac.firebaseapp.com",
+      databaseURL: "https://aplicativo4000-313ac-default-rtdb.firebaseio.com",
+      projectId: "aplicativo4000-313ac",
+      storageBucket: "aplicativo4000-313ac.firebasestorage.app",
+      messagingSenderId: "986487372530",
+      appId: "1:986487372530:web:dba10d0c0aef8d03c0ee6b",
+      measurementId: "G-8DK6YXBWQH"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const auth = firebase.auth();
+
+    const logoutButton = document.getElementById('logoutButton');
+
+    // Verificar estado de autenticação
+    auth.onAuthStateChanged((user) => {
+      if (!user) {
+        // Usuário não está logado - redirecionar para index.html
+        window.location.href = 'index.html';
+      } else {
+        // Usuário está logado - iniciar aplicação
+        iniciarAplicacao();
+      }
+    });
+
+    // Logout
+    logoutButton.addEventListener('click', () => {
+      auth.signOut();
+    });
+
+    // Função para iniciar a aplicação após login
+    function iniciarAplicacao() {
+      function atualizarBotaoClasse(botao, ligado) {
+        botao.classList.remove("ligado", "desligado", "pulse");
+        botao.classList.add(ligado ? "ligado" : "desligado");
+      }
+
+      function atualizarBotaoAutomatico(valor) {
+        const botao = document.getElementById('ligarDesligar');
+        botao.classList.remove("ligado-automatico", "desligado-automatico");
+
+        if (valor == 2) {
+          botao.classList.add("ligado-automatico");
+        } else {
+          botao.classList.add("desligado-automatico");
+        }
+      }
+
+      document.getElementById('btnLed5').addEventListener('click', () => {
+        const ref = db.ref("/led5");
+        ref.once("value").then(snapshot => {
+          const novo = snapshot.val() === "0" ? "1" : "0";
+          ref.set(novo);
+        });
+      });
+
+      document.getElementById('btnLed').addEventListener('click', () => {
+        const ref = db.ref("/led");
+        ref.once("value").then(snapshot => {
+          const novo = snapshot.val() === "0" ? "1" : "0";
+          ref.set(novo);
+        });
+      });
+
+      document.getElementById('btnExtra1').addEventListener('click', () => {
+        const ref = db.ref("/led2");
+        ref.once("value").then(snapshot => {
+          const novo = snapshot.val() === "0" ? "1" : "0";
+          ref.set(novo);
+        });
+      });
+
+      document.getElementById('btnExtra2').addEventListener('click', () => {
+        const ref = db.ref("/led3");
+        ref.once("value").then(snapshot => {
+          const novo = snapshot.val() === "0" ? "1" : "0";
+          ref.set(novo);
+        });
+      });
+
+      document.getElementById('ligarDesligar').addEventListener('click', () => {
+        db.ref("/ligarDesligar").once("value").then(snapshot => {
+          const valorAtual = snapshot.val();
+          const novoValor = (valorAtual == 0) ? 2 : 0;
+          db.ref("/ligarDesligar").set(novoValor);
+        });
+      });
+
+      ['ligarHorario', 'desligarHorario', 'ligarHorario2', 'desligarHorario2'].forEach(id => {
+        document.getElementById(id).addEventListener('change', (e) => {
+          db.ref(`/${id}`).set(e.target.value);
+        });
+      });
+
+      db.ref("/").on('value', snapshot => {
+        const d = snapshot.val();
+        if (!d) return;
+
+        const btnLed5 = document.getElementById('btnLed5');
+        const btnLed1 = document.getElementById('btnLed');
+        const btnExtra1 = document.getElementById('btnExtra1');
+        const btnExtra2 = document.getElementById('btnExtra2');
+        const btnPrincipal = document.getElementById('ligarDesligar');
+
+        document.getElementById("ligarHorario").value = d.ligarHorario || "";
+        document.getElementById("desligarHorario").value = d.desligarHorario || "";
+        document.getElementById("ligarHorario2").value = d.ligarHorario2 || "";
+        document.getElementById("desligarHorario2").value = d.desligarHorario2 || "";
+
+        if (d.ligarDesligar !== undefined) {
+          atualizarBotaoAutomatico(d.ligarDesligar);
+          document.getElementById('releStatus').innerText =
+            d.ligarDesligar == 2 ? "Modo: Programado" : "Modo: Manual";
+        }
+
+        if (d.rele !== undefined) {
+          const ligado = d.rele === "0";
+          btnLed5.classList.remove("vermelho", "ligado", "desligado");
+          btnLed5.classList.add(ligado ? "vermelho" : "desligado");
+          if (ligado) btnLed5.classList.add("ligado");
+          if (!ligado) btnLed1.classList.add("pulse");
+        }
+
+        if (d.led !== undefined) {
+          const ligado = d.led === "1";
+          btnLed.classList.remove("ligado", "desligado", "pulse");
+          btnLed.classList.add(ligado ? "desligado" : "ligado");
+          if (!ligado) btnLed.classList.add("pulse");
+        }
+
+        if (d.led2 !== undefined) {
+          const ligado = d.led2 === "1";
+          btnExtra1.classList.remove("ligado", "desligado", "pulse");
+          btnExtra1.classList.add(ligado ? "desligado" : "ligado");
+          if (!ligado) btnExtra1.classList.add("pulse");
+        }
+
+        if (d.led3 !== undefined) {
+          const ligado = d.led3 === "1";
+          btnExtra2.classList.remove("ligado", "desligado", "pulse");
+          btnExtra2.classList.add(ligado ? "desligado" : "ligado");
+          if (!ligado) btnExtra2.classList.add("pulse");
+        }
+
+        document.getElementById("Temperature").innerText = d.Temperature || "";
+        document.getElementById("Humidity").innerText = d.Humidity || "";
+        document.getElementById("LDR").innerText = d.LDR || "";
+
+        document.getElementById("dataConexao").innerText = d.datasAtual || "";
+        document.getElementById("horaConexao").innerText = d.hora || "";
+        document.getElementById("minutoConexao").innerText = d.minuto || "";
+        document.getElementById("segundoConexao").innerText = d.segundo || "";
+
+        document.getElementById("horasAtual").innerText = d.horasAtual || "";
+        document.getElementById("minutosAtual").innerText = d.minutosAtual || "";
+        document.getElementById("segundosAtual").innerText = d.segundosAtual || "";
+
+        document.getElementById("statusConexao").innerText = d.Status == 1 ? "1" : "0";
+        btnPrincipal.classList.toggle("pulse", d.Status == 1);
+      });
+
+      function atualizarRelogio() {
+        const agora = new Date();
+        document.getElementById('relogio').innerText = agora.toLocaleTimeString();
+      }
+      setInterval(atualizarRelogio, 1000);
+    }
+  </script>
+</body>
+</html>

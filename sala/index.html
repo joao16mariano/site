@@ -1,0 +1,387 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Controle Wemos</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+    body {
+      background: linear-gradient(90deg, rgba(24, 16, 163, 1) 0%, rgba(9, 44, 121, 1) 4%, rgba(0, 212, 255, 1) 100%);
+      color: white;
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-box {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      width: 90%;
+      max-width: 400px; 
+      text-align: center;
+    }
+
+    .login-box h2 {
+      margin-bottom: 30px;
+      font-size: 32px;
+      color: white;
+    }
+
+    .login-input {
+      width: 100%;
+      padding: 15px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .login-button {
+      width: 100%;
+      padding: 15px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      background: #4CAF50;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .login-button:hover {
+      background: #45a049;
+    }
+
+    .login-button:disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+    }
+
+    .secondary-button {
+      width: 100%;
+      padding: 12px;
+      margin: 5px 0;
+      border: 2px solid #4CAF50;
+      border-radius: 8px;
+      font-size: 16px;
+      background: transparent;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .secondary-button:hover {
+      background: #4CAF50;
+    }
+
+    .error-message {
+      color: #ff6b6b;
+      margin: 10px 0;
+      font-size: 14px;
+      min-height: 20px;
+    }
+
+    .success-message {
+      color: #4CAF50;
+      margin: 10px 0;
+      font-size: 14px;
+      min-height: 20px;
+    }
+
+    .login-tabs {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .tab-button {
+      flex: 1;
+      padding: 15px;
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s;
+    }
+
+    .tab-button.active {
+      border-bottom: 3px solid #4CAF50;
+      color: #4CAF50;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h2>Controle Wemos</h2>
+    
+    <div class="login-tabs">
+      <button id="loginTab" class="tab-button active">Entrar</button>
+      <button id="registerTab" class="tab-button">Cadastrar</button>
+    </div>
+
+    <div id="loginForm" class="tab-content active">
+      <input type="email" id="email" class="login-input" placeholder="E-mail" required>
+      <input type="password" id="password" class="login-input" placeholder="Senha" required>
+      <div id="errorMessage" class="error-message"></div>
+      <button id="loginButton" class="login-button">Entrar</button>
+    </div>
+
+    <div id="registerForm" class="tab-content">
+      <input type="text" id="registerName" class="login-input" placeholder="Nome completo" required>
+      <input type="email" id="registerEmail" class="login-input" placeholder="E-mail" required>
+      <input type="password" id="registerPassword" class="login-input" placeholder="Senha (mínimo 6 caracteres)" required>
+      <input type="password" id="confirmPassword" class="login-input" placeholder="Confirmar senha" required>
+      <div id="registerErrorMessage" class="error-message"></div>
+      <div id="registerSuccessMessage" class="success-message"></div>
+      <button id="registerButton" class="login-button">Cadastrar</button>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAKS3HncDL0JMXqMt8PZBL6LPaNOJUTmrM",
+      authDomain: "aplicativo4000-313ac.firebaseapp.com",
+      databaseURL: "https://aplicativo4000-313ac-default-rtdb.firebaseio.com",
+      projectId: "aplicativo4000-313ac",
+      storageBucket: "aplicativo4000-313ac.firebasestorage.app",
+      messagingSenderId: "986487372530",
+      appId: "1:986487372530:web:dba10d0c0aef8d03c0ee6b",
+      measurementId: "G-8DK6YXBWQH"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Elementos da interface
+    const loginTab = document.getElementById('loginTab');
+    const registerTab = document.getElementById('registerTab');
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    
+    // Login elements
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const loginButton = document.getElementById('loginButton');
+    const errorMessage = document.getElementById('errorMessage');
+    
+    // Register elements
+    const registerName = document.getElementById('registerName');
+    const registerEmail = document.getElementById('registerEmail');
+    const registerPassword = document.getElementById('registerPassword');
+    const confirmPassword = document.getElementById('confirmPassword');
+    const registerButton = document.getElementById('registerButton');
+    const registerErrorMessage = document.getElementById('registerErrorMessage');
+    const registerSuccessMessage = document.getElementById('registerSuccessMessage');
+
+    // Sistema de abas
+    loginTab.addEventListener('click', () => {
+      loginTab.classList.add('active');
+      registerTab.classList.remove('active');
+      loginForm.classList.add('active');
+      registerForm.classList.remove('active');
+      clearMessages();
+    });
+
+    registerTab.addEventListener('click', () => {
+      registerTab.classList.add('active');
+      loginTab.classList.remove('active');
+      registerForm.classList.add('active');
+      loginForm.classList.remove('active');
+      clearMessages();
+    });
+
+    function clearMessages() {
+      errorMessage.textContent = '';
+      registerErrorMessage.textContent = '';
+      registerSuccessMessage.textContent = '';
+    }
+
+    // Verificar estado de autenticação
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        // Redirecionar para principal.html
+        window.location.href = 'principal.html';
+      }
+    });
+
+    // Login
+    loginButton.addEventListener('click', () => {
+      const email = emailInput.value;
+      const password = passwordInput.value;
+      
+      if (!email || !password) {
+        errorMessage.textContent = 'Por favor, preencha todos os campos.';
+        return;
+      }
+
+      loginButton.disabled = true;
+      loginButton.textContent = 'Entrando...';
+
+      auth.signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          // Redirecionamento será feito pelo onAuthStateChanged
+        })
+        .catch((error) => {
+          let message = 'Erro ao fazer login. ';
+          switch (error.code) {
+            case 'auth/invalid-email':
+              message += 'E-mail inválido.';
+              break;
+            case 'auth/user-disabled':
+              message += 'Usuário desativado.';
+              break;
+            case 'auth/user-not-found':
+              message += 'Usuário não encontrado.';
+              break;
+            case 'auth/wrong-password':
+              message += 'Senha incorreta.';
+              break;
+            default:
+              message += error.message;
+          }
+          errorMessage.textContent = message;
+        })
+        .finally(() => {
+          loginButton.disabled = false;
+          loginButton.textContent = 'Entrar';
+        });
+    });
+
+    // Cadastro de novo usuário
+    registerButton.addEventListener('click', () => {
+      const name = registerName.value;
+      const email = registerEmail.value;
+      const password = registerPassword.value;
+      const confirm = confirmPassword.value;
+      
+      // Validações
+      if (!name || !email || !password || !confirm) {
+        registerErrorMessage.textContent = 'Por favor, preencha todos os campos.';
+        return;
+      }
+
+      if (password.length < 6) {
+        registerErrorMessage.textContent = 'A senha deve ter pelo menos 6 caracteres.';
+        return;
+      }
+
+      if (password !== confirm) {
+        registerErrorMessage.textContent = 'As senhas não coincidem.';
+        return;
+      }
+
+      if (!validateEmail(email)) {
+        registerErrorMessage.textContent = 'Por favor, insira um e-mail válido.';
+        return;
+      }
+
+      registerButton.disabled = true;
+      registerButton.textContent = 'Cadastrando...';
+      registerErrorMessage.textContent = '';
+      registerSuccessMessage.textContent = '';
+
+      auth.createUserWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          // Usuário criado com sucesso
+          const user = userCredential.user;
+          
+          // Atualizar o perfil do usuário com o nome
+          return user.updateProfile({
+            displayName: name
+          });
+        })
+        .then(() => {
+          registerSuccessMessage.textContent = 'Cadastro realizado com sucesso!';
+          registerName.value = '';
+          registerEmail.value = '';
+          registerPassword.value = '';
+          confirmPassword.value = '';
+          
+          // Mudar para a aba de login após 2 segundos
+          setTimeout(() => {
+            loginTab.click();
+          }, 2000);
+        })
+        .catch((error) => {
+          let message = 'Erro ao cadastrar. ';
+          switch (error.code) {
+            case 'auth/email-already-in-use':
+              message += 'Este e-mail já está em uso.';
+              break;
+            case 'auth/invalid-email':
+              message += 'E-mail inválido.';
+              break;
+            case 'auth/operation-not-allowed':
+              message += 'Operação não permitida.';
+              break;
+            case 'auth/weak-password':
+              message += 'Senha muito fraca.';
+              break;
+            default:
+              message += error.message;
+          }
+          registerErrorMessage.textContent = message;
+        })
+        .finally(() => {
+          registerButton.disabled = false;
+          registerButton.textContent = 'Cadastrar';
+        });
+    });
+
+    // Função para validar e-mail
+    function validateEmail(email) {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    }
+
+    // Permitir login com Enter
+    passwordInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        loginButton.click();
+      }
+    });
+
+    // Permitir cadastro com Enter
+    confirmPassword.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        registerButton.click();
+      }
+    });
+  </script>
+</body>
+</html>
