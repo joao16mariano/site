@@ -4,6 +4,12 @@
 <head>
   <meta charset="UTF-8">
   <title>Controle Wemos</title>
+  <!-- Start WOWSlider.com HEAD section -->
+<link rel="stylesheet" type="text/css" href="engine1/style.css" />
+<script type="text/javascript" src="engine1/jquery.js"></script>
+<!-- End WOWSlider.com HEAD section -->
+  
+  
   <style>
     * {
       box-sizing: border-box;
@@ -147,7 +153,7 @@
         border-radius: 5px;
         cursor: pointer;
         font-size: 30px;
-		font-weight: 900; /* negrito */
+		font-weight: 700; /* negrito */
         margin: 5px;
         display: inline-flex;
         align-items: center;
@@ -263,7 +269,7 @@
       background: linear-gradient(135deg, #ff7a00 0%, #000000 100%);
       padding: 30px;
       border-radius: 12px;
-      margin: 15px 0;
+      margin: 1px 0;
       text-align: center;
       border: 1px solid white;
     }
@@ -431,11 +437,22 @@
       border: 1px solid white;
     }	
 	
-	img {  
+	img {
+  width: 100%;
   height: 98%;
   object-fit: cover;  /* preenche sem distorcer, cortando bordas */
-  width: 880px; /* opcional */
 }
+
+	
+
+.pagina2 img {
+  width: 880px; /* opcional */
+  margin-top: 1px;
+  margin-bottom: 10px;
+ padding: -80px;
+  margin-bottom: 0px;
+}
+
 
     /* Botão de logout */
     .logout-btn {      
@@ -463,15 +480,27 @@
   <div id="loadingScreen" class="loading-screen">
     <div class="loading-spinner"></div>
   </div> 
-<div class="pagina2">
-    <img src="img/Luzdaarea.png" class="banner">
 
-    <!-- <img src="img/Luzdaarea.png" width="800" height="150" style="margin-bottom: 30px;"> -->
-    </div>
   <!-- Botão de logout CORRIGIDO -->
   <button id="logoutBtn" class="logout-btn">Sair</button>
 
- 
+ <!-- Start WOWSlider.com BODY section -->
+<div id="wowslider-container1">
+<div class="ws_images"><ul>
+		<li><img src="data1/images/luzdaarea.png" alt="1" title="." id="wows1_0"/></li>
+		<li><a href="http://wowslider.net"><img src="data1/images/luzdaarea1.png" alt="slider" title="." id="wows1_1"/></a></li>
+		<li><img src="data1/images/luzdaarea2.png" alt="Luzdaarea2"  id="wows1_2"/></li>
+	</ul></div>
+	<div class="ws_bullets"><div>
+		<a href="#" title="."><span><img src="data1/tooltips/luzdaarea.png" alt="1"/>1</span></a>
+		<a href="#" title="."><span><img src="data1/tooltips/luzdaarea1.png" alt="2"/>2</span></a>
+		<a href="#" title="."><span><img src="data1/tooltips/luzdaarea2.png" alt="3"/>3</span></a>
+	</div></div><div class="ws_script" style="position:absolute;left:-99%"><a href="http://wowslider.net">bootstrap slideshow</a> by WOWSlider.com v8.8</div>
+<div class="ws_shadow"></div>
+</div>	
+<script type="text/javascript" src="engine1/wowslider.js"></script>
+<script type="text/javascript" src="engine1/script.js"></script>
+<!-- End WOWSlider.com BODY section -->
 
   <div class="pagina">
     <h2>Páginas hospedadas no gitHub</h2>
@@ -843,8 +872,8 @@
       setInterval(atualizarRelogio, 1000);
     }
 
-	  var senha = prompt("Digite a senha:");
-  if(senha !== "mariano75"){
+	  	  var senha = prompt("Digite a senha:");
+  if(senha !== "75"){
     document.body.innerHTML = "<h2>Acesso negado</h2>";
   }
   </script>
@@ -855,8 +884,3 @@
     
 
       
-
-
-
-
-
