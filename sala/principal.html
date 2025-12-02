@@ -1,8 +1,13 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <title>Controle Wemos</title>
+  
+  <!-- Start WOWSlider.com HEAD section -->
+<link rel="stylesheet" type="text/css" href="engine1/style.css" />
+<script type="text/javascript" src="engine1/jquery.js"></script>
+<!-- End WOWSlider.com HEAD section -->
   <style>
     * {
       box-sizing: border-box;
@@ -280,12 +285,151 @@
     .hidden {
       display: none !important;
     }
+	
+	/* Nova classe para os botões da seção de páginas */
+    .pagina-botao {
+        width: 150px;
+        height: 40px;
+        padding: 30px 95px;
+        background: #036;
+        color:#FFF;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 30px;
+		font-weight: 700; /* negrito */
+        margin: 5px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        transition: all 0.15s ease;
+        box-shadow: 
+            0 6px 0 #022,
+            0 0 0 2px white;
+        position: relative;
+    }
+
+    .pagina-botao:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(6px);
+        box-shadow: 
+            0 0 0 #022,
+            0 0 0 2px white;
+    }
+	.pagina-botao:active {
+        transform: translateY(6px) scale(0.98);
+        transition: all 0.1s ease;
+    }
+	
+	 .pagina {
+      width: 880px;
+      max-width: 1820px;
+     background: linear-gradient(90deg,rgba(78, 78, 87, 1) 0%, rgba(100, 100, 135, 1) 22%, rgba(139, 193, 204, 1) 100%);
+
+      padding: 30px;
+      border-radius: 12px;
+      margin: 1px 0;
+      text-align: center;
+      border: 1px solid white;
+    }	
+	
+	img {
+  width: 100%;
+  height: 98%;
+  object-fit: cover;  /* preenche sem distorcer, cortando bordas */
+}
+
+	
+
+.pagina2 img {
+  width: 880px; /* opcional */
+  margin-top: 1px;
+  margin-bottom: 10px;
+ padding: -80px;
+  margin-bottom: 0px;
+}
+
+
+    /* Botão de logout */
+    .logout-btn {      
+       position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 10px 20px;
+      background: #ff4757;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      z-index: 100;
+    }
+
+    .logout-btn:hover {
+      background: #ff3742;
+      transform: scale(1.05);
+    }
+
   </style>
 </head>
 <body>
   <button id="logoutButton" class="logout-button">Sair</button>
   
-  <img src="img/Luzdaarea.png" width="864" height="150" style="margin-bottom: 30px;">
+ <!-- Start WOWSlider.com BODY section -->
+<div id="wowslider-container1">
+<div class="ws_images"><ul>
+		<li><img src="data1/images/luzdaarea.png" alt="Luzdaarea" title="Luzdaarea" id="wows1_0"/></li>
+		<li><a href="http://wowslider.net"><img src="data1/images/luzdaarea1.png" alt="css slideshow" title="Luzdaarea1" id="wows1_1"/></a></li>
+		<li><img src="data1/images/luzdaarea2.png" alt="Luzdaarea2" title="Luzdaarea2" id="wows1_2"/></li>
+	</ul></div>
+<div class="ws_script" style="position:absolute;left:-99%"><a href="http://wowslider.net">css slider</a> by WOWSlider.com v8.8</div>
+<div class="ws_shadow"></div>
+</div>	
+<script type="text/javascript" src="engine1/wowslider.js"></script>
+<script type="text/javascript" src="engine1/script.js"></script>
+<!-- End WOWSlider.com BODY section -->
+  
+   <div class="pagina">
+    <h2>Páginas hospedadas no gitHub</h2>
+    <!-- Botão de Logout -->
+    <div>. </div>
+    <button class="pagina-botao" onclick="window.location.href='../index.html'">
+      Portão
+    </button>
+
+    <button class="pagina-botao" onclick="window.location.href='../bebedouro/index.html'">
+      Bebedouro
+    </button>
+
+    <button class="pagina-botao" onclick="window.location.href='../area/index.html'">
+      Luz Área
+    </button>
+
+    <button class="pagina-botao" onclick="window.location.href='../inversor/index.html'">
+      Inversor
+    </button>
+
+    <button class="pagina-botao" onclick="window.location.href='../computador/index.html'">
+      Computador
+    </button>
+
+    <button class="pagina-botao" onclick="window.location.href='../sala/index.html'">
+      TV Sala
+    </button>
+
+    <button class="pagina-botao" onclick="window.location.href='../inversor/index.html'">
+      Inversor
+    </button>    
+	
+	<button class="pagina-botao" onclick="window.location.href='../caixa/index.html'">
+  C. d'água
+</button>	
+</div>
+
 
   <div class="topo" style="flex-direction: column; align-items: center;">
     <div style="display: flex; flex-direction: column; align-items: center; gap: 30px;">
