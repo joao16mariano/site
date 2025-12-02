@@ -484,18 +484,14 @@
   <!-- Botão de logout CORRIGIDO -->
   <button id="logoutBtn" class="logout-btn">Sair</button>
 
- <!-- Start WOWSlider.com BODY section -->
+<!-- Start WOWSlider.com BODY section -->
 <div id="wowslider-container1">
 <div class="ws_images"><ul>
-		<li><img src="data1/images/luzdaarea.png" alt="1" title="." id="wows1_0"/></li>
-		<li><a href="http://wowslider.net"><img src="data1/images/luzdaarea1.png" alt="slider" title="." id="wows1_1"/></a></li>
-		<li><img src="data1/images/luzdaarea2.png" alt="Luzdaarea2"  id="wows1_2"/></li>
+		<li><img src="data1/images/luzdaarea.png" alt="Luzdaarea" title="Luzdaarea" id="wows1_0"/></li>
+		<li><a href="http://wowslider.net"><img src="data1/images/luzdaarea1.png" alt="css slideshow" title="Luzdaarea1" id="wows1_1"/></a></li>
+		<li><img src="data1/images/luzdaarea2.png" alt="Luzdaarea2" title="Luzdaarea2" id="wows1_2"/></li>
 	</ul></div>
-	<div class="ws_bullets"><div>
-		<a href="#" title="."><span><img src="data1/tooltips/luzdaarea.png" alt="1"/>1</span></a>
-		<a href="#" title="."><span><img src="data1/tooltips/luzdaarea1.png" alt="2"/>2</span></a>
-		<a href="#" title="."><span><img src="data1/tooltips/luzdaarea2.png" alt="3"/>3</span></a>
-	</div></div><div class="ws_script" style="position:absolute;left:-99%"><a href="http://wowslider.net">bootstrap slideshow</a> by WOWSlider.com v8.8</div>
+<div class="ws_script" style="position:absolute;left:-99%"><a href="http://wowslider.net">css slider</a> by WOWSlider.com v8.8</div>
 <div class="ws_shadow"></div>
 </div>	
 <script type="text/javascript" src="engine1/wowslider.js"></script>
@@ -871,6 +867,11 @@
       }
       setInterval(atualizarRelogio, 1000);
     }
+
+	   var senha = prompt("Digite a senha:");
+  if(senha !== "qw"){
+    document.body.innerHTML = "<h2>Acesso negado</h2>";
+  }
   </script>
 </body>
 </html> 
